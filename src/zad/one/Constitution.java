@@ -17,12 +17,12 @@ import java.util.stream.Collectors;
 public class Constitution implements IConstitution {
     //filepath to the constitution.txt
     private List<Chapter> chapters = new LinkedList<>();               //List of chapters of constitution
-    private String preamble;                                                 //Text of preambule
+    private String preamble = "";                                                 //Text of preambule
     private int amountOfChapters;
 
-    public Constitution(Path filepath) {
+    public Constitution(Path filepath, Set preambleSet) {   //filepath - path to a txt file with constitution, preambuleSet - Set with no. of lines of preambule (counting from 0)
         Parser parser = new Parser(filepath);
-        parser.parse();
+        parser.parse(preambleSet);
     }
 
 
@@ -48,21 +48,34 @@ public class Constitution implements IConstitution {
     }
 
 
+
+
+
+
+
+
     private class Parser {
         private FileReader reader;
         private Path filepath;
         private List<String> lines = new LinkedList<>();
+        private Set preambleSet;
+
+
 
         public Parser(Path filepath) {
             this.filepath = filepath;
         }
 
-        public void parse() {
+        public void parse(Set preambleSet) {
+            this.preambleSet = preambleSet;
             openConstitutionFile();
             clearNotNeededLines();
             concatenateWordsMovedToNextLine();
             devideConstitution();
         }
+
+
+
 
         private void openConstitutionFile() {
             try {
@@ -75,40 +88,63 @@ public class Constitution implements IConstitution {
         private void clearNotNeededLines() {
             List<String> tmp = new LinkedList<>();
 
-            for (String l : lines) {
-                if (!(l.equals("©Kancelaria Sejmu") || l.equals("2009-11-16"))) {    //todo nie usuwac linii, tylko zwracać listę linii, które zostawiamy i podmieni
+            for (int i = 0; i < lines.size(); i++) {
+                String l = lines.get(i);
+                if (!l.equals("©Kancelaria Sejmu") && !l.equals("2009-11-16")) {
                     tmp.add(l);
+                }else{
+                    updatePreambleSet(i);
                 }
             }
             lines = tmp;
         }
 
         private void concatenateWordsMovedToNextLine() {
-            int slen = lines.size();
             List<String> tmp = new LinkedList<>();
 
-            for(int i = 0; i < slen; i++){
-                if(lines.get(i).endsWith("-")){
-                    //if(lines.size() == i+1) throw new Exception("Documents ends with \"-\", but it shouldn't");
-                    String nextLine = lines.get(i+1);
-                    String currentLine = lines.get(i);
+            boolean toPass = false;             //czy omijamy wstawianie nastepnej linii
+
+            for(int i = 0; i < lines.size()-1; i++){
+
+                String nextLine = lines.get(i+1);
+                String currentLine = lines.get(i);
+
+                if(currentLine.endsWith("-")){
 
                     String []toReplace = nextLine.split(" ", 2);
-                    currentLine = currentLine.substring(0, currentLine.length() - 2);
+                    currentLine = currentLine.substring(0, currentLine.length() - 1);
                     tmp.add("" + currentLine + toReplace[0]);
-                    tmp.add(toReplace[1]);
+                    if(toReplace.length == 2) {
+                        tmp.add(toReplace[1]);
+                        toPass = true;              //dodajemy już przyszłą linię, więc w przyszłej iteracji omijamy wstawianie
+                    }
+                    else {
+                        updatePreambleSet(i + 1);       //jeżeli połączyliśmy końcówkę słowa, które było jedynym w linii, to znaczy, że usuwamy linię i+1 - szą
+                    }
                 }else{
-                    tmp.add(lines.get(i));
+                    if(!toPass) tmp.add(currentLine);
+                    toPass = false;
                 }
             }
 
             lines = tmp;
-            System.out.println(lines.get(12).toString());
-            System.out.println(lines.get(13).toString());
-            System.out.println(lines.get(14).toString());
+        }
+
+        private void updatePreambleSet(int x){      //updates preambleSet after removng x-th line in document
+            if (preambleSet.isBetween(x)) {
+                preambleSet.decY();                 //jesli przenieslismy jedno slwo z nastepnej linii, traicmy jedna linie
+            }
+            else if(preambleSet.getY() > x){
+                preambleSet.decY();
+                preambleSet.decX();
+            }
         }
 
         private void devideConstitution() {
+            for(int i = preambleSet.getX(); i <= preambleSet.getY(); i++)
+                preamble = preamble.concat(lines.get(i) + " ");
+
+
         }
     }
 }
