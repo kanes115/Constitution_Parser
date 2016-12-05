@@ -5,7 +5,7 @@ package zad.one;
  */
 public interface IChapter {
 
-   void addArticle(Article article);
+    void addArticle(Article article);
 
     Article getArticle(int articleNo);
 

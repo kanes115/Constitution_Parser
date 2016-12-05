@@ -10,5 +10,5 @@ public class FilePath {
         this.filepath = filepath;
     }
 
-    public void getFilepath(){return filepath;}
+    public String getFilepath(){return filepath;}
 }

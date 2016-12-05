@@ -16,5 +16,5 @@ public class Article implements IArticle {
 
 
     @Override
-    public String toString(){}
+    public String toString(){return new String("");}
 }
