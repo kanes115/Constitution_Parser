@@ -1,7 +1,9 @@
 package zad.one;
 
 /**
- * Created by Kanes on 05.12.2016.
+ * TODO:
+ *- Exceptions
+ * -Tests
  */
 public class Set {
     private int x, y;

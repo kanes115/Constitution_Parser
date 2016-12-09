@@ -1,13 +1,17 @@
 package zad.one;
 
+import zad.one.Exceptions.ConstitutionException;
+
 /**
  * Created by Kanes on 29.11.2016.
  */
 public interface IConstitution {
 
-    void display(int startArticle, int endArticle);
+    String display(int startArticle, int endArticle) throws ConstitutionException;
 
-    void display(int articleNo);
+    String display(int articleNo) throws ConstitutionException;
 
-    void displayChapter(int chapterNo);
+    String displayChapter(int chapterNo) throws ConstitutionException;
+
+    String displayPreamble();
 }
